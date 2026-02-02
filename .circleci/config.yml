@@ -55,16 +55,14 @@ jobs:
           name: Create .elasticbeanstalk config
           command: |
             mkdir -p .elasticbeanstalk
-            cat > .elasticbeanstalk/config.yml << EOF
-            branch-defaults:
-              main:
-                environment: Docker-react-app-env
-            global:
-              application_name: docker-react-app
-              default_platform: Docker
-              default_region: $AWS_REGION
-              sc: git
-            EOF
+            echo "branch-defaults:" > .elasticbeanstalk/config.yml
+            echo "  main:" >> .elasticbeanstalk/config.yml
+            echo "    environment: Docker-react-app-env" >> .elasticbeanstalk/config.yml
+            echo "global:" >> .elasticbeanstalk/config.yml
+            echo "  application_name: docker-react-app" >> .elasticbeanstalk/config.yml
+            echo "  default_platform: Docker" >> .elasticbeanstalk/config.yml
+            echo "  default_region: $AWS_REGION" >> .elasticbeanstalk/config.yml
+            echo "  sc: git" >> .elasticbeanstalk/config.yml
       - run:
           name: Deploy to Elastic Beanstalk
           command: |
