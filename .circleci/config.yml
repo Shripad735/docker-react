@@ -52,10 +52,23 @@ jobs:
           command: |
             pip install awsebcli --upgrade
       - run:
+          name: Create .elasticbeanstalk config
+          command: |
+            mkdir -p .elasticbeanstalk
+            cat > .elasticbeanstalk/config.yml << EOF
+            branch-defaults:
+              main:
+                environment: Docker-react-app-env
+            global:
+              application_name: docker-react-app
+              default_platform: Docker
+              default_region: $AWS_REGION
+              sc: git
+            EOF
+      - run:
           name: Deploy to Elastic Beanstalk
           command: |
-            eb init docker-react-app --region $AWS_REGION --platform docker
-            eb deploy Docker-react-app-env
+            eb deploy Docker-react-app-env --verbose
 
 workflows:
   build-and-test-workflow:
