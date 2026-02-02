@@ -52,6 +52,17 @@ jobs:
           command: |
             pip install awsebcli --upgrade
       - run:
+          name: Check files before deploy
+          command: |
+            echo "=== Checking current directory ==="
+            pwd
+            echo "=== Listing files ==="
+            ls -la
+            echo "=== Checking for Dockerfile ==="
+            cat Dockerfile || echo "Dockerfile not found!"
+            echo "=== Checking for Dockerrun.aws.json ==="
+            cat Dockerrun.aws.json || echo "Dockerrun.aws.json not found!"
+      - run:
           name: Create .elasticbeanstalk config
           command: |
             mkdir -p .elasticbeanstalk
@@ -64,9 +75,24 @@ jobs:
             echo "  default_region: $AWS_REGION" >> .elasticbeanstalk/config.yml
             echo "  sc: git" >> .elasticbeanstalk/config.yml
       - run:
+          name: Plan a deploy
+          command: |
+            circleci run release plan \
+              --environment-name="production" \
+              --component-name="docker-react-app" \
+              --target-version="${CIRCLE_SHA1}"
+      - run:
           name: Deploy to Elastic Beanstalk
           command: |
             eb deploy Docker-react-app-env --verbose
+      - run:
+          name: Update deploy to SUCCESS
+          command: circleci run release update --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deploy to FAILED
+          command: circleci run release update --status=FAILED
+          when: on_fail
 
 workflows:
   build-and-test-workflow:
